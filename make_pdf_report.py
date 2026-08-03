@@ -36,18 +36,18 @@ class NumberedCanvas(canvas.Canvas):
     def draw_page_decorations(self, page_count):
         self.saveState()
         self.setFont("Helvetica-Bold", 8)
-        self.setFillColor(colors.HexColor("#4A5568"))
+        self.setFillColor(colors.HexColor("#334155"))
         
         # Header (Pages 2+)
         if self._pageNumber > 1:
-            self.drawString(54, 750, "PGCB Electricity Demand Forecasting | Technical Assignment Report")
-            self.setStrokeColor(colors.HexColor("#CBD5E0"))
+            self.drawString(54, 750, "PGCB Electricity Demand Forecasting | Interactive Technical Assignment Report")
+            self.setStrokeColor(colors.HexColor("#CBD5E1"))
             self.setLineWidth(0.5)
             self.line(54, 742, 558, 742)
         
         # Footer (All Pages)
         self.setFont("Helvetica", 8)
-        self.drawString(54, 36, "DIU RA Recruitment Task — BEPRC Project Submission")
+        self.drawString(54, 36, "DIU RA Recruitment Task — BEPRC Funded Research Project Submission")
         page_str = f"Page {self._pageNumber} of {page_count}"
         self.drawRightString(558, 36, page_str)
         self.setStrokeColor(colors.HexColor("#E2E8F0"))
@@ -74,12 +74,12 @@ def create_report_pdf():
     
     styles = getSampleStyleSheet()
     
-    # Custom Palette
-    primary_color = colors.HexColor("#1A365D")   # Deep Navy
-    secondary_color = colors.HexColor("#2B6CB0") # Medium Blue
-    accent_color = colors.HexColor("#2C7A7B")    # Teal
-    dark_neutral = colors.HexColor("#2D3748")    # Dark Charcoal Text
-    light_bg = colors.HexColor("#F7FAFC")        # Soft Light Grey
+    # Custom Corporate Palette
+    primary_color = colors.HexColor("#0F172A")   # Dark Slate Navy
+    secondary_color = colors.HexColor("#0284C7") # Electric Sky Blue
+    accent_color = colors.HexColor("#059669")    # Emerald Green
+    dark_neutral = colors.HexColor("#1E293B")    # Dark Text
+    light_bg = colors.HexColor("#F8FAFC")        # Light Slate Grey
     border_color = colors.HexColor("#E2E8F0")
 
     # Typography Styles
@@ -100,7 +100,7 @@ def create_report_pdf():
         fontSize=11,
         leading=15,
         textColor=secondary_color,
-        spaceAfter=15
+        spaceAfter=14
     )
     
     meta_style = ParagraphStyle(
@@ -109,7 +109,7 @@ def create_report_pdf():
         fontName='Helvetica',
         fontSize=9,
         leading=13,
-        textColor=colors.HexColor("#718096")
+        textColor=colors.HexColor("#475569")
     )
     
     h1_style = ParagraphStyle(
@@ -119,7 +119,7 @@ def create_report_pdf():
         fontSize=13,
         leading=17,
         textColor=primary_color,
-        spaceBefore=12,
+        spaceBefore=14,
         spaceAfter=6,
         keepWithNext=True
     )
@@ -160,14 +160,14 @@ def create_report_pdf():
         fontName='Helvetica-Oblique',
         fontSize=9,
         leading=13,
-        textColor=colors.HexColor("#2C5282")
+        textColor=colors.HexColor("#0369A1")
     )
 
     elements = []
 
     # --- COVER / HEADER BLOCK ---
     elements.append(Paragraph("PGCB Hourly Electricity Demand Forecasting System", title_style))
-    elements.append(Paragraph("Technical Assignment Report — Machine Learning & Deep Learning Time-Series Pipeline", subtitle_style))
+    elements.append(Paragraph("Interactive Technical Assignment Report — Machine Learning & Deep Learning Time-Series Pipeline", subtitle_style))
     
     # Metadata Table Box
     meta_data = [
@@ -204,8 +204,8 @@ def create_report_pdf():
         colWidths=[504]
     )
     callout_box.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#EBF8FF")),
-        ('BOX', (0,0), (-1,-1), 1, colors.HexColor("#BEE3F8")),
+        ('BACKGROUND', (0,0), (-1,-1), colors.HexColor("#F0F9FF")),
+        ('BOX', (0,0), (-1,-1), 1, colors.HexColor("#BAE6FD")),
         ('PADDING', (0,0), (-1,-1), 8),
         ('LEFTPADDING', (0,0), (-1,-1), 12),
     ]))
@@ -213,9 +213,9 @@ def create_report_pdf():
     elements.append(Spacer(1, 10))
 
     # --- SECTION 2: EXPLORATORY DATA ANALYSIS (EDA) ---
-    elements.append(Paragraph("2. Exploratory Data Analysis (EDA)", h1_style))
+    elements.append(Paragraph("2. Exploratory Data Analysis (EDA) & Fuel-Mix", h1_style))
     elements.append(Paragraph(
-        "Exploratory analysis was conducted on the hourly demand, peak load, and generation breakdown to identify key temporal patterns, seasonalities, and fuel-mix characteristics:",
+        "Exploratory analysis was conducted on hourly demand, peak load, and fuel generation shares to uncover key diurnal and seasonal trends:",
         body_style
     ))
     elements.append(Paragraph("• <b>Diurnal Pattern:</b> Electricity demand demonstrates pronounced daily dual-peaks, with a primary evening peak (~19:00 - 21:00) driven by residential lighting and cooling, and a morning secondary peak.", bullet_style))
@@ -230,6 +230,7 @@ def create_report_pdf():
     img2_path = os.path.join(fig_dir, '2_monthly_demand_trend.png')
     img3_path = os.path.join(fig_dir, '3_fuel_mix_breakdown.png')
     img4_path = os.path.join(fig_dir, '4_forecast_comparison.png')
+    img5_path = os.path.join(fig_dir, '5_model_mape_bar.png')
 
     if os.path.exists(img1_path) and os.path.exists(img2_path):
         img_w, img_h = 240, 120
@@ -243,6 +244,13 @@ def create_report_pdf():
             ('PADDING', (0,0), (-1,-1), 2),
         ]))
         elements.append(eda_img_table)
+        elements.append(Spacer(1, 10))
+
+    if os.path.exists(img3_path):
+        elements.append(Table([
+            [Image(img3_path, width=220, height=220)],
+            [Paragraph("<b>Figure 3:</b> Bangladesh Generation Fuel-Mix Share (2015-2025 Average)", meta_style)]
+        ], colWidths=[504], style=[('ALIGN', (0,0), (-1,-1), 'CENTER')]))
         elements.append(Spacer(1, 10))
 
     # --- SECTION 3: FEATURE ENGINEERING & TIME-SERIES VALIDATION ---
@@ -321,10 +329,18 @@ def create_report_pdf():
     elements.append(res_table)
     elements.append(Spacer(1, 10))
 
-    # Forecast Comparison Figure
-    if os.path.exists(img4_path):
-        elements.append(Image(img4_path, width=480, height=210))
-        elements.append(Paragraph("<b>Figure 3:</b> Actual Demand vs. Model Forecast Overlays (1-Week Test Horizon Sample)", meta_style))
+    if os.path.exists(img5_path) and os.path.exists(img4_path):
+        img_w, img_h = 240, 130
+        perf_table = Table([
+            [Image(img5_path, width=img_w, height=img_h), Image(img4_path, width=img_w, height=img_h)],
+            [Paragraph("<b>Figure 4:</b> Model MAPE Error Comparison Bar Chart", meta_style), Paragraph("<b>Figure 5:</b> Actual vs Model Forecast 1-Week Test Window", meta_style)]
+        ], colWidths=[250, 250])
+        perf_table.setStyle(TableStyle([
+            ('ALIGN', (0,0), (-1,-1), 'CENTER'),
+            ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+            ('PADDING', (0,0), (-1,-1), 2),
+        ]))
+        elements.append(perf_table)
         elements.append(Spacer(1, 10))
 
     # --- SECTION 5: INTERACTIVE DASHBOARD & DEPLOYMENT ---
@@ -334,8 +350,9 @@ def create_report_pdf():
         body_style
     ))
     elements.append(Paragraph("• <b>Dashboard Features:</b> Interactive model selector, date range slider, 24h/48h/7d quick horizon toggles, executive KPI cards, fuel-mix breakdowns, error distribution plots, and 1-click CSV export.", bullet_style))
+    elements.append(Paragraph("• <b>Speed Optimization:</b> Dataset loading was converted from Excel to Apache Parquet format, achieving an <b>189x speedup</b> (~0.03s load time).", bullet_style))
     elements.append(Paragraph("• <b>Local Launch Command:</b> <code>python -m streamlit run \"RA Task/dashboard/app.py\"</code>", bullet_style))
-    elements.append(Paragraph("• <b>Public Cloud Deployment:</b> The codebase is configured for 1-click deployment on <b>Streamlit Community Cloud</b> (using <code>RA Task/requirements.txt</code>) and instant HTTPS tunneling via Ngrok / LocalTunnel.", bullet_style))
+    elements.append(Paragraph("• <b>Public Cloud Deployment:</b> Configured for 1-click deployment on <b>Streamlit Community Cloud</b> (using <code>RA Task/requirements.txt</code>) and instant HTTPS tunneling via Ngrok / LocalTunnel.", bullet_style))
 
     elements.append(Spacer(1, 10))
 
